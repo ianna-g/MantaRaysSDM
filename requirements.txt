@@ -1,0 +1,16 @@
+# data stack
+pandas>=2.0.0
+numpy>=1.25.0
+requests>=2.31.0
+
+# for retry logic, HTTPS adapters, etc.
+urllib3>=2.0.0
+
+# for concurrent downloads
+tqdm>=4.66.0
+
+# optional (but recommended for saving/loading caches)
+cloudpickle>=3.0.0
+
+# optional: If you use Jupyter or IPython to run this interactively
+ipykernel>=6.29.0
