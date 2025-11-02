@@ -15,13 +15,17 @@ aerial_data <- aerial_data %>%
   filter(!is.na(Longitude) & !is.na(Latitude))
 
 aerial_data <- aerial_data %>%
+  mutate(
+    Longitude = as.numeric(Longitude),
+    Latitude  = as.numeric(Latitude)
+  ) %>%
   st_as_sf(coords = c("Longitude", "Latitude"), dim = "XY") %>%
   st_set_crs(4326) %>%
   st_transform(32617) %>%
   select()
 
 cell_size <- 100
-band_width <- 150
+band_width <- 300
 print("test")
 
 
@@ -60,3 +64,5 @@ names(kde)
 summary(sf::st_drop_geometry(kde))
 sum(is.na(kde$kde_value))
 range(kde$kde_value, na.rm = TRUE)
+
+st_intersects(grid_aerial_data, aerial_data, sparse = FALSE)

@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 import pandas as pd
+from typing import Optional
 
 
 def _gaussian_kernel_2d(bw_lon: float, bw_lat: float, dlon: float, dlat: float, truncate: float = 3.0) -> np.ndarray:
@@ -83,9 +84,11 @@ def run_from_csv(
     lon_range=None,
     lat_range=None,
     out_npz: str = "kde_grid.npz",
-    out_png: str | None = None,
-):
+    out_png: Optional[str] = None,
+): 
     df = pd.read_csv(in_csv)
+    # normalize headers: trim whitespace
+    df.columns = [c.strip() for c in df.columns]
     if lon_col not in df.columns or lat_col not in df.columns:
         raise ValueError(f"Missing required columns: {lon_col}, {lat_col}")
     lons = df[lon_col].to_numpy(dtype=float, copy=False)
@@ -123,7 +126,7 @@ def run_from_csv(
     return density, lon_edges, lat_edges
 
 
-def _parse_range(s: str | None):
+def _parse_range(s: Optional[str]):
     if not s:
         return None
     parts = [p.strip() for p in s.split(",")]
