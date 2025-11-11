@@ -76,6 +76,12 @@ print(p)
 tmap_mode("plot")
 tmap_save(p, "kde2.png", dpi = 200, width = 8, height = 8, units = "in")
 tmap_mode("view")
+p <- 
+  tm_basemap("Esri.WorldTopoMap") +
+  tm_shape(kde) +
+  tm_polygons(col = "kde_value", palette = "YlOrRd", style = "cont",
+              border.col = NA, title = "Manta Density", lwd = 0, alpha = 1)
+print(p)
 print(p)
 
 
