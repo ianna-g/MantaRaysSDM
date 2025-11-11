@@ -1,5 +1,5 @@
 # Set working directory
-setwd("c:/Users/megal/Desktop/mantas")
+#setwd("c:/Users/iannag/Desktop/Desktop - Ianna’s MacBook Air/GradSchool/Internship/MantaRaysSDM")
 
 library(SpatialKDE)
 library(sp)
@@ -7,7 +7,7 @@ library(sf)
 library(dplyr)
 library(tmap)
 print("started")
-aerial_data <- read.csv("mantas2020.csv", na.strings = c("", "NA", "N/A", "NULL", "NaN"))
+aerial_data <- read.csv("Trimmed Aerial Data_backup file_08302025.xlsx - 2020.csv", na.strings = c("", "NA", "N/A", "NULL", "NaN"))
 
 #disregard any lines that have a blank value for longitude or latitude
 aerial_data <- aerial_data %>%
@@ -17,16 +17,16 @@ aerial_data <- aerial_data %>%
   mutate(
     Longitude = as.numeric(Longitude),
     Latitude  = as.numeric(Latitude),
-    manta_pres = as.numeric(manta_pres)
+    manta_pres = as.numeric(`Number.of.Mantas`)
   ) %>%
-  filter(manta_pres > 0) %>%  
+  filter(manta_pres > 0) %>%
   st_as_sf(coords = c("Longitude", "Latitude"), dim = "XY") %>%
   st_set_crs(4326) %>%
   st_transform(32617) %>%
   select(manta_pres)
 
-cell_size <- 50   
-band_width <- 500 
+cell_size <- 50
+band_width <- 500
 
 
 grid_aerial_data <- aerial_data %>%
@@ -54,15 +54,27 @@ p <- tm_shape(kde) +
     style = "cont",  # Continuous color scale
     border.col = NA,  # Remove cell borders
     title = "Manta Density",
-    alpha = 0.8  # Some transparency
-  ) +
-  tm_shape(aerial_data) +
-  tm_bubbles(size = 0.05, col = "black", alpha = 0.5)  # Smaller, subtle points
+    lwd = 0,
+    alpha = 1  # Some transparency
+  ) 
+  #tm_shape(aerial_data) +
+  #tm_bubbles(size = 0.02, col = "black", alpha = 0.8)+
+  #tm_layout(frame = FALSE)  # Smaller, subtle points
+
 
 
 print(p)  
 
-tmap_save(p, "kde.png", dpi = 200, width = 8, height = 8, units = "in")
+# # optional: make a subfolder
+# dir.create("outputs", showWarnings = FALSE)
+
+# tmap_mode("plot")  # important for PNG/PDF
+# outfile <- file.path("outputs", "kde1.png")
+
+# tmap_save(p, outfile, dpi = 300, width = 8, height = 8, units = "in")
+# cat("Saved to:", normalizePath(outfile), "\n")
+tmap_mode("plot")
+tmap_save(p, "kde2.png", dpi = 200, width = 8, height = 8, units = "in")
 tmap_mode("view")
 print(p)
 
