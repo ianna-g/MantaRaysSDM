@@ -17,15 +17,16 @@ aerial_data <- aerial_data %>%
 aerial_data <- aerial_data %>%
   mutate(
     Longitude = as.numeric(Longitude),
-    Latitude  = as.numeric(Latitude)
+    Latitude  = as.numeric(Latitude),
+    mantas = as.numeric("Number of Mantas")
   ) %>%
   st_as_sf(coords = c("Longitude", "Latitude"), dim = "XY") %>%
   st_set_crs(4326) %>%
   st_transform(32617) %>%
   select()
 
-cell_size <- 100
-band_width <- 300
+cell_size <- 25
+band_width <- 150
 print("test")
 
 
