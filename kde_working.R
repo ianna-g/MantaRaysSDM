@@ -16,8 +16,6 @@ process_dataset <- function(csv_path,
     csv_path,
     na.strings = c("", "NA", "N/A", "NULL", "NaN")
   )
-dat <- read.csv(csv_path, na.strings = c("", "NA", "N/A", "NULL", "NaN"))
-print(names(dat))
 
   dat <- dat %>% 
     mutate(
@@ -27,21 +25,21 @@ print(names(dat))
       manta_pres = as.numeric(`Number.of.Mantas`)
     ) %>% 
     filter(!is.na(Longitude) & !is.na(Latitude)) %>% 
-    filter(!is.na(`On.Off.Effort`) & `On.Off.Effort` == 1) %>% 
+    filter(!is.na(`On.Off.Effort`) & `On.Off.Effort` == 0) %>% 
     filter(!is.na(manta_pres)) %>% 
     st_as_sf(coords = c("Longitude", "Latitude"), dim = "XY") %>% 
     st_set_crs(4326) %>% 
     st_transform(32617) %>% 
     select(manta_pres)
 
-  # if (nrow(dat) == 0) {
-  #   message(
-  #     "No rows after filtering (coords present, on-effort == 1, and ",
-  #     "manta_pres > 0). Skipping file: ",
-  #     csv_path
-  #   )
-  #   return(invisible(NULL))
-  # }
+  if (nrow(dat) == 0) {
+    message(
+      "No rows after filtering (coords present, on-effort == 1, and ",
+      "manta_pres > 0). Skipping file: ",
+      csv_path
+    )
+    return(invisible(NULL))
+  }
 
   grid <- dat %>% 
     create_grid_rectangular(
