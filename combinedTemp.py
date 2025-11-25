@@ -44,9 +44,10 @@ def get_temp(station_id, date):
         return None
     temps = []
     for obs in observations:
-        temp = obs['properties'].get('temperature')
-        if temp and temp['value'] is not None:
-            temps.append(temp['value'])
+        temp_data = obs['properties'].get('temperature', {})
+        temp_c = temp_data.get('value')
+        if temp_c is not None:
+            temps.append(temp_c)
 
     if not temps:
         print("No temp found")
@@ -59,13 +60,18 @@ def get_temp(station_id, date):
 #for now I'm just testing to se how API's work
 lat = 26.6156
 long = -80.0491
-date = "2025-10-03"
+date = "2023-10-03"
 
 try:
     station = closest_station(lat, long)
     print(f"The nearest station is {station}" )
     temps = get_temp(station, date)
     print(f"the temperature was {temps}°C")
+    if temp_c is not None:
+        print(f"The average temperature was {temp_c:.1f}°C")
+    else:
+        print("Could not retrieve temperature data")
+
 
 except Exception as e:
     print("Something went wrong")

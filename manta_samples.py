@@ -29,13 +29,13 @@ Usage:
 # --------------------------- User Config ------------------------------------
 # Assumes PC operations. Adjust for mac as necessary. Optionally set your working directory (uncomment and edit):
 import os
-os.chdir(r"YOUR\WORKING\DIR")
+os.chdir(r"/Users/iannag/Desktop/Desktop - Ianna’s MacBook Air/GradSchool/Internship/MantaRaysSDM")
 
 IN_CSV  = r"Trimmed_Aerial_Data_backup_file_08302025.csv" #renamed
 OUT_CSV = r"Trimmed_Aerial_Data_draft.csv"
 
 # NOAA CDO token (provided by you)
-NOAA_TOKEN = "YoUrKeYhErE"
+NOAA_TOKEN = "sRvONKWkNdHOVNbKScjBvuRbcjhGtaVU"
 # ---------------------------------------------------------------------------
 
 BIN_DEG = 0.10

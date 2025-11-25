@@ -10,7 +10,7 @@ print("started")
 
 process_dataset <- function(csv_path,
                             out_stem = NULL,
-                            cell_size = 50,
+                            cell_size = 100,
                             band_width = 500) {
   dat <- read.csv(
     csv_path,
