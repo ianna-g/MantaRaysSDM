@@ -136,7 +136,15 @@ summary(mod_gamm)
 # --- 7. Diagnostics ---------------------------------------------------------
 # 7a: check residuals (DHARMa)
 sim_res <- simulateResiduals(mod_gamm, plot = FALSE)
-plot(sim_res)   # DHARMa diagnostic plots
+plot(sim_res)   # DHARMa diagnostic plots. outputs residuas. residuals from the model output
+#run tests on resiuals to make sure output from the gamm is reliable. 
+# acf(residuals(m))
+# moran.test(residuals(m) ,lw)
+
+# the residuals will allow us to identify obvious outliers.
+# we are also going to plot them. [model evaluation process]
+#generate a qq plot. we are going to want to look for some shape. nice scattered residual plot. 
+#ideally no distinctive shape. else it is over/under fit. 
 
 # 7b: concurvity checks (nonlinear collinearity)
 concur <- mgcv::concurvity(mod_gamm, full = TRUE)
@@ -144,6 +152,10 @@ print(concur)
 
 # 7c: check k-index / basis dimension (gives warnings if k too low)
 gam.check(mod_gamm)
+
+#if we gwt k values too low we may need to refit....
+#s(x, k=10)
+#s(x, k=20)
 
 # --- 8. Visualize smooths and partial effects -------------------------------
 # using gratia (nicer plotting)
@@ -155,6 +167,12 @@ draw(mod_gamm, select = NULL)  # will plot all smooths; or select = 1 etc.
 anova(mod_gamm)   # approximate significance of terms
 plot(mod_gamm, pages = 1, rug = TRUE, shade = TRUE)
 #### more tests!!!! Model evaluation steps!!!!
+
+#Look for residual auto correlation###
+# use this as a guide: s(x, k=10). s(x, k=20)
+
+#And spatial auto correlation
+#these will output values and we will look at them as they relate to our data 
 
 # --- 9. Interpret important outputs ----------------------------------------
 # - summary(mod_gamm) shows estimated degrees of freedom (edf) for smooths and p-values
