@@ -155,10 +155,12 @@ sapply(df[, c("tavg_c",
 sapply(df[, c("tavg_c",
               "tide_height_m",
               "nearest_inlet_km",
+              "tide_intensity",
               "lunar_illum",
               "chlor_a",
               "prcp_mm_prev_day")],
        function(x) length(unique(x)))
+
 
 
 # Fit the full GAMM model with robust settings
@@ -173,9 +175,8 @@ mod_full <- bam(
     s(prcp_mm_prev_day, k=3)+
 
     # Categorical fixed effects
-    as.factor(tide_intensity) +
-    as.factor(tide_stage)+
-    as.factor(sea_state),
+    tide_stage+
+    sea_state,
 
   data = df,
   family = binomial(link = "logit"),
@@ -266,6 +267,7 @@ df$pred_prob <- predict(mod_full, newdata = df, type = "response")
 # Save model
 # saveRDS(mod_gamm, "gamm_manta_model.rds")
 
+
 #step 1:
 df$pred <- predict(mod_full, newdata = df, type = "response")
 
@@ -282,6 +284,13 @@ ggplot(df, aes(x = longitude_6, y = latitude_5)) +
     x = "Longitude",
     y = "Latitude"
   )
+
+summary(df$pred)
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+#0.000   0.002   0.003   0.004   0.004   0.044   17182 
+range(df$pred, na.rm = TRUE)
+# 8.815796e-13 4.434208e-02
+
 
 #step 3:
 library(dplyr)
@@ -305,9 +314,7 @@ grid$nearest_inlet_km  <- mean(df$nearest_inlet_km, na.rm = TRUE)
 grid$lunar_illum       <- mean(df$lunar_illum, na.rm = TRUE)
 grid$chlor_a           <- mean(df$chlor_a, na.rm = TRUE)
 grid$prcp_mm_prev_day  <- mean(df$prcp_mm_prev_day, na.rm = TRUE)
-grid$tide_intensity    <- as.factor(names(sort(table(df$tide_intensity), decreasing=TRUE))[1])
 grid$sea_state         <- as.factor(names(sort(table(df$sea_state), decreasing=TRUE))[1])
-grid$transect          <- NA  # random effect is ignored for SDM mapping
 
 
 grid$pred <- predict(mod_full, newdata = grid, type = "response")
@@ -326,3 +333,112 @@ ggplot(grid, aes(longitude_6, latitude_5, fill = pred)) +
 
 
 
+
+library(ggplot2)
+library(viridis)
+library(dplyr)
+library(ggspatial)
+
+# Remove NA predictions
+plot_df <- df %>%
+  filter(!is.na(pred))
+
+# Optionally exaggerate small probabilities for color
+plot_df <- plot_df %>%
+  mutate(pred_log = log1p(pred))
+
+# Plot heatmap on ESRI World Topo Map
+ggplot() +
+  # Basemap tiles
+  annotation_map_tile(type = "Esri.WorldTopoMap") +
+  
+  # Heatmap of predicted presence
+  geom_point(
+    data = plot_df,
+    aes(x = longitude_6, y = latitude_5, color = pred_log),
+    size = 2, alpha = 0.7
+  ) +
+  
+  # Optional: overlay observed manta sightings
+  geom_point(
+    data = plot_df %>% filter(presence == 1),
+    aes(x = longitude_6, y = latitude_5),
+    color = "red",
+    size = 1.5
+  ) +
+  
+  scale_color_viridis(
+    name = "log(1 + Predicted probability)",
+    option = "magma"
+  ) +
+  
+  theme_minimal() +
+  labs(
+    title = "Predicted Manta Ray Presence on Map",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  coord_sf(xlim = range(plot_df$longitude_6), ylim = range(plot_df$latitude_5))
+
+
+##another version
+library(leaflet)
+library(dplyr)
+
+# Remove NAs in predictions
+plot_df <- df %>% filter(!is.na(pred))
+
+# Create a color palette for predictions
+pal <- colorNumeric(
+  palette = "magma",
+  domain = plot_df$pred
+)
+
+# Interactive leaflet map
+leaflet(plot_df) %>%
+  addProviderTiles(providers$Esri.WorldTopoMap) %>%  # Basemap
+  addCircleMarkers(
+    lng = ~longitude_6,
+    lat = ~latitude_5,
+    radius = 3,
+    color = ~pal(pred),
+    stroke = FALSE,
+    fillOpacity = 0.7,
+    popup = ~paste0("Predicted probability: ", round(pred, 5))
+  ) %>%
+  addLegend(
+    "bottomright",
+    pal = pal,
+    values = ~pred,
+    title = "Predicted presence",
+    opacity = 1
+  )
+
+
+##USE THIS MAP TO SEE THE MAIN PREDICTED LOCATION
+
+
+library(leaflet)
+library(dplyr)
+library(leaflet.extras)
+
+# Remove NAs in predictions
+plot_df <- df %>% filter(!is.na(pred))
+
+# Create a color palette for predictions
+pal <- colorNumeric(
+  palette = "magma",
+  domain = plot_df$pred
+)
+
+# Interactive leaflet map
+leaflet(plot_df) %>%
+  addProviderTiles(providers$Esri.WorldTopoMap) %>%  # Basemap
+  addHeatmap(
+    lng = ~longitude_6,
+    lat = ~latitude_5,
+    intensity = ~pred,
+    blur = 20,
+    max = max(plot_df$pred, na.rm = TRUE),
+    radius = 15
+  ) 
